@@ -1,820 +1,822 @@
-# Google Gen AI SDK
+Google Gen AI SDK
+======
 
-[![PyPI version](https://img.shields.io/pypi/v/google-genai.svg)](https://pypi.org/project/google-genai/)
+|pypi|
 
---------
-**Documentation:** https://googleapis.github.io/python-genai/
+`<https://github.com/googleapis/python-genai>`_
 
------
+.. |pypi| image:: https://img.shields.io/pypi/v/google-genai.svg
+   :target: https://pypi.org/project/google-genai/
 
-## Installation
+:strong:`google-genai` is an initial Python client library for interacting with
+Google's Generative AI APIs. This SDK provides an interface for developers to
+integrate Google's generative models into their Python applications. This is an
+early release (version 0.1.0). API is subject to change. Please do not use this
+SDK in production.
 
-``` cmd
-pip install google-genai
-```
+Installation
+============
 
-## Imports
+.. code::  console
 
-``` python
-from google import genai
-from google.genai import types
-```
+    pip install google-genai
 
-## Create a client
+Imports
+=======
+
+.. code:: python
+
+    from google import genai
+    from google.genai import types
+
+Create a client
+===============
 
 Please run one of the following code blocks to create a client for
-different services (Google AI or Vertex). Feel free to switch the client
-and run all the examples to see how it behaves under different APIs.
+different services (Google AI or Vertex). Feel free to switch the client and
+run all the examples to see how it behaves under different APIs.
 
-``` python
-# Only run this block for Google AI API
-client = genai.Client(api_key='YOUR_API_KEY')
-```
+.. code:: python
 
-``` python
-# Only run this block for Vertex AI API
-client = genai.Client(
-    vertexai=True, project='your-project-id', location='us-central1'
-)
-```
+    # Only run this block for Google AI API
+    client = genai.Client(api_key='YOUR_API_KEY')
 
-## Types
+.. code:: python
+
+    # Only run this block for Vertex AI API
+    client = genai.Client(
+        vertexai=True, project='your-project-id', location='us-central1'
+    )
+
+Types
+=====
 
 Parameter types can be specified as either dictionaries(TypedDict) or
-pydantic Models. Pydantic model types are available in the `types`
+pydantic Models. Pydantic model types are available in the ``types``
 module.
 
-## Models
+Models
+======
 
-The `client.models` modules exposes model inferencing and model getters.
+The ``client.models`` modules exposes model inferencing and model
+getters.
 
-### Generate Content
+Generate Content
+----------------
 
-``` python
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp', contents='What is your name?'
-)
-print(response.text)
-```
+.. code:: python
 
-### System Instructions and Other Configs
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp', contents='What is your name?'
+    )
+    print(response.text)
 
-``` python
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents='high',
-    config=types.GenerateContentConfig(
-        system_instruction='I say high, you say low',
-        temperature= 0.3,
-    ),
-)
-print(response.text)
-```
+System Instructions and Other Configs
+-------------------------------------
 
-### Typed Config
+.. code:: python
+
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents='high',
+        config=types.GenerateContentConfig(
+            system_instruction='I say high, you say low',
+            temperature= 0.3,
+        ),
+    )
+    print(response.text)
+
+Typed Config
+------------
 
 All API methods support pydantic types for parameters as well as
-dictionaries. You can get the type from `google.genai.types`.
+dictionaries. You can get the type from ``google.genai.types``.
 
-``` python
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents=types.Part.from_text('Why is sky blue?'),
-    config=types.GenerateContentConfig(
-        temperature=0,
-        top_p=0.95,
-        top_k=20,
-        candidate_count=1,
-        seed=5,
-        max_output_tokens=100,
-        stop_sequences=["STOP!"],
-        presence_penalty=0.0,
-        frequency_penalty=0.0,
+.. code:: python
+
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents=types.Part.from_text('Why is sky blue?'),
+        config=types.GenerateContentConfig(
+            temperature=0,
+            top_p=0.95,
+            top_k=20,
+            candidate_count=1,
+            seed=5,
+            max_output_tokens=100,
+            stop_sequences=["STOP!"],
+            presence_penalty=0.0,
+            frequency_penalty=0.0,
+        )
     )
-)
 
-response
-```
+    response
 
-### Safety Settings
+Safety Settings
+---------------
 
-``` python
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents='Say something bad.',
-    config=types.GenerateContentConfig(
-        safety_settings= [types.SafetySetting(
-            category='HARM_CATEGORY_HATE_SPEECH',
-            threshold='BLOCK_ONLY_HIGH',
-        )]
-    ),
-)
-print(response.text)
-```
+.. code:: python
 
-### Function Calling
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents='Say something bad.',
+        config=types.GenerateContentConfig(
+            safety_settings= [types.SafetySetting(
+                category='HARM_CATEGORY_HATE_SPEECH',
+                threshold='BLOCK_ONLY_HIGH',
+            )]
+        ),
+    )
+    print(response.text)
 
-#### Automatic Python function Support
+Function Calling
+----------------
+
+Automatic Python function Support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can pass a python function directly and it will be automatically
 called and responded.
 
-``` python
-def get_current_weather(location: str,) -> int:
-  """Returns the current weather.
+.. code:: python
 
-  Args:
-    location: The city and state, e.g. San Francisco, CA
-  """
-  return 'sunny'
+    def get_current_weather(location: str,) -> int:
+      """Returns the current weather.
 
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents="What is the weather like in Boston?",
-    config=types.GenerateContentConfig(tools=[get_current_weather],)
-)
+      Args:
+        location: The city and state, e.g. San Francisco, CA
+      """
+      return 'sunny'
 
-response.text
-```
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents="What is the weather like in Boston?",
+        config=types.GenerateContentConfig(tools=[get_current_weather],)
+    )
 
-#### Manually declare and invoke a function for function calling
+    response.text
 
-If you don't want to use the automatic function support, you can manually
-declare the function and invoke it.
+.. code:: python
 
-The following example shows how to declare a function and pass it as a tool.
-Then you will receive a function call part in the response.
-
-``` python
-function = dict(
-    name="get_current_weather",
-    description="Get the current weather in a given location",
-    parameters={
-      "type": "OBJECT",
-      "properties": {
-          "location": {
-              "type": "STRING",
-              "description": "The city and state, e.g. San Francisco, CA",
+    function = dict(
+        name="get_current_weather",
+        description="Get the current weather in a given location",
+        parameters={
+          "type": "OBJECT",
+          "properties": {
+              "location": {
+                  "type": "STRING",
+                  "description": "The city and state, e.g. San Francisco, CA",
+              },
           },
-      },
-      "required": ["location"],
-    }
-)
+          "required": ["location"],
+        }
+    )
 
-tool = types.Tool(function_declarations=[function])
-
-
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents="What is the weather like in Boston?",
-    config=types.GenerateContentConfig(tools=[tool],)
-)
-
-response.candidates[0].content.parts[0].function_call
-```
-
-After you receive the function call part from model, you can invoke the function
-and get the function response. And then you can pass the function response to
-the model.
-The following example shows how to do it for a simple function invocation.
-
-``` python
-function_call_part = response.candidates[0].content.parts[0]
-
-try:
-  function_result = get_current_weather(**function_call_part.function_call.args)
-  function_response = {'result': function_result}
-except Exception as e:  # instead of raising the exception, you can let the model handle it
-  function_response = {'error': str(e)}
+    tool = types.Tool(function_declarations=[function])
 
 
-function_response_part = types.Part.from_function_response(
-    name=function_call_part.function_call.name,
-    response=function_response,
-)
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents="What is the weather like in Boston?",
+        config=types.GenerateContentConfig(tools=[tool],)
+    )
 
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents=[
-        types.Part.from_text("What is the weather like in Boston?"),
-        function_call_part,
-        function_response_part,
-    ])
+    response.candidates[0].content.parts[0].function_call
 
-response
-```
+.. code:: python
 
-### JSON Response Schema
+    function_call_part = response.candidates[0].content.parts[0]
 
-#### Pydantic Model Schema support
+    function_reponse = get_current_weather(**function_call_part.function_call.args)
+
+
+    function_response_part = types.Part.from_function_response(
+        name=function_call_part.function_call.name,
+        response={'result': function_response}
+    )
+
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents=[
+            types.Part.from_text("What is the weather like in Boston?"),
+            function_call_part,
+            function_response_part,
+        ])
+
+    response
+
+JSON Response Schema
+--------------------
+
+Pydantic Model Schema support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Schemas can be provided as Pydantic Models.
 
-``` python
-from pydantic import BaseModel
+.. code:: python
 
-class CountryInfo(BaseModel):
-  name: str
-  population: int
-  capital: str
-  continent: str
-  gdp: int
-  official_language: str
-  total_area_sq_mi: int
+    from pydantic import BaseModel
+
+    class CountryInfo(BaseModel):
+      name: str
+      population: int
+      capital: str
+      continent: str
+      gdp: int
+      official_language: str
+      total_area_sq_mi: int
 
 
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents='Give me information of the United States.',
-    config=types.GenerateContentConfig(
-        response_mime_type= 'application/json',
-        response_schema= CountryInfo,
-    ),
-)
-print(response.text)
-```
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents='Give me information of the United States.',
+        config=types.GenerateContentConfig(
+            response_mime_type= 'application/json',
+            response_schema= CountryInfo,
+        ),
+    )
+    print(response.text)
 
-``` python
-response = client.models.generate_content(
-    model='gemini-2.0-flash-exp',
-    contents='Give me information of the United States.',
-    config={
-        'response_mime_type': 'application/json',
-        'response_schema': {
-            'required': [
-                'name',
-                'population',
-                'capital',
-                'continent',
-                'gdp',
-                'official_language',
-                'total_area_sq_mi',
-            ],
-            'properties': {
-                'name': {'type': 'STRING'},
-                'population': {'type': 'INTEGER'},
-                'capital': {'type': 'STRING'},
-                'continent': {'type': 'STRING'},
-                'gdp': {'type': 'INTEGER'},
-                'official_language': {'type': 'STRING'},
-                'total_area_sq_mi': {'type': 'INTEGER'},
+.. code:: python
+
+    response = client.models.generate_content(
+        model='gemini-2.0-flash-exp',
+        contents='Give me information of the United States.',
+        config={
+            'response_mime_type': 'application/json',
+            'response_schema': {
+                'required': [
+                    'name',
+                    'population',
+                    'capital',
+                    'continent',
+                    'gdp',
+                    'official_language',
+                    'total_area_sq_mi',
+                ],
+                'properties': {
+                    'name': {'type': 'STRING'},
+                    'population': {'type': 'INTEGER'},
+                    'capital': {'type': 'STRING'},
+                    'continent': {'type': 'STRING'},
+                    'gdp': {'type': 'INTEGER'},
+                    'official_language': {'type': 'STRING'},
+                    'total_area_sq_mi': {'type': 'INTEGER'},
+                },
+                'type': 'OBJECT',
             },
-            'type': 'OBJECT',
         },
-    },
-)
-print(response.text)
-```
+    )
+    print(response.text)
 
-### Streaming
 
-#### Streaming for text content
+Streaming
+---------
 
-``` python
-for chunk in client.models.generate_content_stream(
-    model='gemini-2.0-flash-exp', contents='Tell me a story in 300 words.'
-):
-  print(chunk.text)
-```
+.. code:: python
 
-#### Streaming for image content
+    for chunk in client.models.generate_content_stream(
+        model='gemini-2.0-flash-exp', contents='Tell me a story in 300 words.'
+    ):
+      print(chunk.text)
 
-If your image is stored in Google Cloud Storage, you can use the `from_uri`
-class method to create a Part object.
+Async
+-----
 
-``` python
-for chunk in client.models.generate_content_stream(
-    model='gemini-1.5-flash',
-    contents=[
-      'What is this image about?',
-      types.Part.from_uri(
-        file_uri='gs://generativeai-downloads/images/scones.jpg',
-        mime_type='image/jpeg'
-      )
-    ],
-):
-  print(chunk.text)
-```
+``client.aio`` exposes all the analogous ``async`` methods that are
+available on ``client``
 
-If your image is stored in your local file system, you can read it in as bytes
-data and use the `from_bytes` class method to create a Part object.
+For example, ``client.aio.models.generate_content`` is the async version
+of ``client.models.generate_content``
 
-``` python
-YOUR_IMAGE_PATH = 'your_image_path'
-YOUR_IMAGE_MIME_TYPE = 'your_image_mime_type'
-with open(YOUR_IMAGE_PATH, 'rb') as f:
-  image_bytes = f.read()
+.. code:: python
 
-for chunk in client.models.generate_content_stream(
-    model='gemini-1.5-flash',
-    contents=[
-      'What is this image about?',
-      types.Part.from_bytes(
-        data=image_bytes,
-        mime_type=YOUR_IMAGE_MIME_TYPE
-      )
-    ],
-):
-  print(chunk.text)
-```
+    request = await client.aio.models.generate_content(
+        model='gemini-2.0-flash-exp', contents='Tell me a story in 300 words.'
+    )
 
-### Async
+    print(response.text)
 
-`client.aio` exposes all the analogous `async` methods that are
-available on `client`
+Streaming
+---------
 
-For example, `client.aio.models.generate_content` is the async version
-of `client.models.generate_content`
+.. code:: python
 
-``` python
-request = await client.aio.models.generate_content(
-    model='gemini-2.0-flash-exp', contents='Tell me a story in 300 words.'
-)
+    async for response in client.aio.models.generate_content_stream(
+        model='gemini-2.0-flash-exp', contents='Tell me a story in 300 words.'
+    ):
+      print(response.text)
 
-print(response.text)
-```
+Count Tokens and Compute Tokens
+-------------------------------
 
-### Streaming
+.. code:: python
 
-``` python
-async for response in client.aio.models.generate_content_stream(
-    model='gemini-2.0-flash-exp', contents='Tell me a story in 300 words.'
-):
-  print(response.text)
-```
+    response = client.models.count_tokens(
+        model='gemini-2.0-flash-exp',
+        contents='What is your name?',
+    )
+    print(response)
 
-### Count Tokens and Compute Tokens
-
-``` python
-response = client.models.count_tokens(
-    model='gemini-2.0-flash-exp',
-    contents='What is your name?',
-)
-print(response)
-```
-
-#### Compute Tokens
+Compute Tokens
+~~~~~~~~~~~~~~
 
 Compute tokens is not supported by Google AI.
 
-``` python
-response = client.models.compute_tokens(
-    model='gemini-2.0-flash-exp',
-    contents='What is your name?',
-)
-print(response)
-```
+.. code:: python
 
-##### Async
+    response = client.models.compute_tokens(
+        model='gemini-2.0-flash-exp',
+        contents='What is your name?',
+    )
+    print(response)
 
-``` python
-response = await client.aio.models.count_tokens(
-    model='gemini-2.0-flash-exp',
-    contents='What is your name?',
-)
-print(response)
-```
+Async
+^^^^^
 
-### Embed Content
+.. code:: python
 
-``` python
-response = client.models.embed_content(
-    model='text-embedding-004',
-    contents='What is your name?',
-)
-response
-```
+    response = await client.aio.models.count_tokens(
+        model='gemini-2.0-flash-exp',
+        contents='What is your name?',
+    )
+    print(response)
 
-``` python
-# multiple contents with config
-response = client.models.embed_content(
-    model='text-embedding-004',
-    contents=['What is your name?', 'What is your age?'],
-    config=types.EmbedContentConfig(output_dimensionality= 10)
-)
+Embed Content
+-------------
 
-response
-```
+.. code:: python
 
-### Imagen
+    response = client.models.embed_content(
+        model='text-embedding-004',
+        contents='What is your name?',
+    )
+    response
 
-#### Generate Image
+.. code:: python
+
+    # multiple contents with config
+    response = client.models.embed_content(
+        model='text-embedding-004',
+        contents=['What is your name?', 'What is your age?'],
+        config=types.EmbedContentConfig(output_dimensionality= 10)
+    )
+
+    response
+
+Imagen
+------
+
+Generate Image
+~~~~~~~~~~~~~~
 
 Support for generate image in Google AI is behind an allowlist
 
-``` python
-# Generate Image
-response1 = client.models.generate_image(
-    model='imagen-3.0-generate-001',
-    prompt='An umbrella in the foreground, and a rainy night sky in the background',
-    config=types.GenerateImageConfig(
-        negative_prompt= "human",
-        number_of_images= 1,
-        include_rai_reason= True,
-        output_mime_type= "image/jpeg"
-    )
-)
-response1.generated_images[0].image.show()
-```
+.. code:: python
 
-#### Upscale Image
+    # Generate Image
+    response1 = client.models.generate_image(
+        model='imagen-3.0-generate-001',
+        prompt='An umbrella in the foreground, and a rainy night sky in the background',
+        config=types.GenerateImageConfig(
+            negative_prompt= "human",
+            number_of_images= 1,
+            include_rai_reason= True,
+            output_mime_type= "image/jpeg"
+        )
+    )
+    response1.generated_images[0].image.show()
+
+Upscale Image
+~~~~~~~~~~~~~
 
 Upscale image is not supported in Google AI.
 
-``` python
-# Upscale the generated image from above
-response2 = client.models.upscale_image(
-    model='imagen-3.0-generate-001',
-    image=response1.generated_images[0].image,
-    config=types.UpscaleImageConfig(upscale_factor="x2")
-)
-response2.generated_images[0].image.show()
-```
+.. code:: python
 
-#### Edit Image
+    # Upscale the generated image from above
+    response2 = client.models.upscale_image(
+        model='imagen-3.0-generate-001',
+        image=response1.generated_images[0].image,
+        config=types.UpscaleImageConfig(upscale_factor="x2")
+    )
+    response2.generated_images[0].image.show()
 
-Edit image uses a separate model from generate and upscale.
+Edit Image
+~~~~~~~~~~
 
 Edit image is not supported in Google AI.
 
-``` python
-# Edit the generated image from above
-from google.genai.types import RawReferenceImage, MaskReferenceImage
-raw_ref_image = RawReferenceImage(
-    reference_id=1,
-    reference_image=response1.generated_images[0].image,
-)
+.. code:: python
 
-# Model computes a mask of the background
-mask_ref_image = MaskReferenceImage(
-    reference_id=2,
-    config=types.MaskReferenceConfig(
-        mask_mode='MASK_MODE_BACKGROUND',
-        mask_dilation=0,
-    ),
-)
-
-response3 = client.models.edit_image(
-    model='imagen-3.0-capability-001',
-    prompt='Sunlight and clear sky',
-    reference_images=[raw_ref_image, mask_ref_image],
-    config=types.EditImageConfig(
-        edit_mode= 'EDIT_MODE_INPAINT_INSERTION',
-        number_of_images= 1,
-        negative_prompt= 'human',
-        include_rai_reason= True,
-        output_mime_type= 'image/jpeg',
-    ),
-)
-response3.generated_images[0].image.show()
-```
-
-## Files (Only Google AI)
-
-``` python
-!gsutil cp gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf .
-!gsutil cp gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf .
-```
-
-### Upload
-
-``` python
-file1 = client.files.upload(path='2312.11805v3.pdf')
-file2 = client.files.upload(path='2403.05530.pdf')
-
-print(file1)
-print(file2)
-```
-
-### Delete
-
-``` python
-file3 = client.files.upload(path='2312.11805v3.pdf')
-
-client.files.delete(name=file3.name)
-```
-
-## Caches
-
-`client.caches` contains the control plane APIs for cached content
-
-### Create
-
-``` python
-if client.vertexai:
-  file_uris = [
-      'gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf',
-      'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf'
-  ]
-else:
-  file_uris = [file1.uri, file2.uri]
-
-cached_content = client.caches.create(
-      model='gemini-1.5-pro-002',
-      contents=[
-          types.Content(
-              role='user',
-              parts=[
-                types.Part.from_uri(
-                    file_uri=file_uris[0],
-                    mime_type='application/pdf'),
-                types.Part.from_uri(
-                    file_uri=file_uris[1],
-                    mime_type='application/pdf',)])
-      ],
-      system_instruction='What is the sum of the two pdfs?',
-      config=types.CreateCachedContentConfig(
-          display_name='test cache',
-          ttl='3600s',
-      ),
-  )
-```
-
-### Get
-
-``` python
-client.caches.get(name=cached_content.name)
-```
-
-### Generate Content
-
-``` python
-client.models.generate_content(
-    model='gemini-1.5-pro-002',
-    contents='Summarize the pdfs',
-    config=types.GenerateContentConfig(
-        cached_content=cached_content.name,
+    # Edit the generated image from above
+    from google.genai.types import RawReferenceImage, MaskReferenceImage
+    raw_ref_image = RawReferenceImage(
+        reference_id=1,
+        reference_image=response1.generated_images[0].image,
     )
-)
-```
 
-## Tunings
-
-`client.tunings` contains tuning job APIs and supports supervised fine
-tuning through `tune` and distillation through `distill`
-
-### Tune
-
--   Vertex supports tuning from GCS source
--   Google AI supports tuning from inline examples
-
-``` python
-if client.vertexai:
-  model = 'gemini-1.5-pro-002'
-  training_dataset=types.TuningDataset(
-        gcs_uri='gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl',
-  )
-else:
-  model = 'models/gemini-1.0-pro-001'
-  training_dataset=types.TuningDataset(
-        examples=[
-            types.TuningExample(
-                text_input=f"Input text {i}",
-                output=f"Output text {i}",
-            )
-            for i in range(5)
-        ],
+    # Model computes a mask of the background
+    mask_ref_image = MaskReferenceImage(
+        reference_id=2,
+        config=types.MaskReferenceConfig(
+            mask_mode='MASK_MODE_BACKGROUND',
+            mask_dilation=0,
+        ),
     )
-```
 
-``` python
-tuning_job = client.tunings.tune(
-    base_model=model,
-    training_dataset=training_dataset,
-    config=types.CreateTuningJobConfig(
-        epoch_count= 1,
-        tuned_model_display_name="test_dataset_examples model"
+    response3 = client.models.edit_image(
+        model='imagen-3.0-capability-preview-0930',
+        prompt='Sunlight and clear sky',
+        reference_images=[raw_ref_image, mask_ref_image],
+        config=types.EditImageConfig(
+            edit_mode= 'EDIT_MODE_INPAINT_INSERTION',
+            number_of_images= 1,
+            negative_prompt= 'human',
+            include_rai_reason= True,
+            output_mime_type= 'image/jpeg',
+        ),
     )
-)
-tuning_job
-```
+    response3.generated_images[0].image.show()
 
-### Get Tuning Job
+Files (Only Google AI)
+======================
 
-``` python
-tuning_job = client.tunings.get(name=tuning_job.name)
-tuning_job
-```
+.. code:: python
 
-``` python
-import time
+    !gsutil cp gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf .
+    !gsutil cp gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf .
 
-running_states = set([
-    "JOB_STATE_PENDING",
-    "JOB_STATE_RUNNING",
-])
+Upload
+------
 
-while tuning_job.state in running_states:
-    print(tuning_job.state)
+.. code:: python
+
+    file1 = client.files.upload(path='2312.11805v3.pdf')
+    file2 = client.files.upload(path='2403.05530.pdf')
+
+    print(file1)
+    print(file2)
+
+Delete
+------
+
+.. code:: python
+
+    file3 = client.files.upload(path='2312.11805v3.pdf')
+
+    client.files.delete(name=file3.name)
+
+Caches
+======
+
+``client.caches`` contains the control plane APIs for cached content
+
+Create
+------
+
+.. code:: python
+
+    if client.vertexai:
+      file_uris = [
+          'gs://cloud-samples-data/generative-ai/pdf/2312.11805v3.pdf',
+          'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf'
+      ]
+    else:
+      file_uris = [file1.uri, file2.uri]
+
+    cached_content = client.caches.create(
+          model='gemini-1.5-pro-002',
+          contents=[
+              types.Content(
+                  role='user',
+                  parts=[
+                    types.Part.from_uri(
+                        file_uri=file_uris[0],
+                        mime_type='application/pdf'),
+                    types.Part.from_uri(
+                        file_uri=file_uris[1],
+                        mime_type='application/pdf',)])
+          ],
+          config=types.CreateCachedContentConfig(
+              display_name='test cache',
+              system_instruction='What is the sum of the two pdfs?',
+              ttl='3600s',
+          ),
+      )
+
+Get
+---
+
+.. code:: python
+
+    client.caches.get(name=cached_content.name)
+
+Generate Content
+----------------
+
+.. code:: python
+
+    client.models.generate_content(
+        model='gemini-1.5-pro-002',
+        contents='Summarize the pdfs',
+        config=types.GenerateContentConfig(
+            cached_content=cached_content.name,
+        )
+    )
+
+Tunings
+=======
+
+``client.tunings`` contains tuning job APIs and supports supervised fine
+tuning through ``tune`` and distillation through ``distill``
+
+Tune
+----
+
+-  Vertex supports tuning from GCS source
+-  Google AI supports tuning from inline examples
+
+.. code:: python
+
+   if client.vertexai:
+      model = 'gemini-1.5-pro-002'
+      training_dataset=types.TuningDataset(
+            gcs_uri='gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl',
+      )
+    else:
+      model = 'models/gemini-1.0-pro-001'
+      training_dataset=types.TuningDataset(
+            examples=[
+                types.TuningExample(
+                    text_input=f"Input text {i}",
+                    output=f"Output text {i}",
+                )
+                for i in range(5)
+            ],
+        )
+
+.. code:: python
+
+    tuning_job = client.tunings.tune(
+        base_model=model,
+        training_dataset=training_dataset,
+        config=types.CreateTuningJobConfig(
+            epoch_count= 1,
+            tuned_model_display_name="test_dataset_examples model"
+        )
+    )
+    tuning_job
+
+Get Tuning Job
+--------------
+
+.. code:: python
+
     tuning_job = client.tunings.get(name=tuning_job.name)
-    time.sleep(10)
-```
+    tuning_job
 
-#### Use Tuned Model
+.. code:: python
 
-``` python
-response = client.models.generate_content(
-    model=tuning_job.tuned_model.endpoint,
-    contents='What is your name?',
-)
+    import time
 
-response.text
-```
+    running_states = set([
+        "JOB_STATE_PENDING",
+        "JOB_STATE_RUNNING",
+    ])
 
-### Get Tuned Model
+    while tuning_job.state in running_states:
+        print(tuning_job.state)
+        tuning_job = client.tunings.get(name=tuning_job.name)
+        time.sleep(10)
 
-``` python
-tuned_model = client.models.get(model=tuning_job.tuned_model.model)
-tuned_model
-```
+Use Tuned Model
+~~~~~~~~~~~~~~~
 
-### List Tuned Models
+.. code:: python
 
-``` python
-for model in client.models.list(config={'page_size': 10}):
-  print(model)
-```
+    response = client.models.generate_content(
+        model=tuning_job.tuned_model.endpoint,
+        contents='What is your name?',
+    )
 
-``` python
-pager = client.models.list(config={'page_size': 10})
-print(pager.page_size)
-print(pager[0])
-pager.next_page()
-print(pager[0])
-```
+    response.text
 
-#### Async
+Get Tuned Model
+---------------
 
-``` python
-async for job in await client.aio.models.list(config={'page_size': 10}):
-  print(job)
-```
+.. code:: python
 
-``` python
-async_pager = await client.aio.models.list(config={'page_size': 10})
-print(async_pager.page_size)
-print(async_pager[0])
-await async_pager.next_page()
-print(async_pager[0])
-```
+    tuned_model = client.models.get(model=tuning_job.tuned_model.model)
+    tuned_model
 
-### Update Tuned Model
+List Tuned Models
+-----------------
 
-``` python
-model = pager[0]
+.. code:: python
 
-model = client.models.update(
-    model=model.name,
-    config=types.UpdateModelConfig(
-        display_name='my tuned model',
-        description='my tuned model description'))
+    for model in client.models.list(config={'page_size': 10}):
+      print(model)
 
-model
-```
+.. code:: python
 
-### Distillation
+    pager = client.models.list(config={'page_size': 10})
+    print(pager.page_size)
+    print(pager[0])
+    pager.next_page()
+    print(pager[0])
+
+Async
+~~~~~
+
+.. code:: python
+
+    async for job in await client.aio.models.list(config={'page_size': 10}):
+      print(job)
+
+.. code:: python
+
+    async_pager = await client.aio.models.list(config={'page_size': 10})
+    print(async_pager.page_size)
+    print(async_pager[0])
+    await async_pager.next_page()
+    print(async_pager[0])
+
+Update Tuned Model
+------------------
+
+.. code:: python
+
+    model = pager[0]
+
+    model = client.models.update(
+        model=model.name,
+        config=types.UpdateModelConfig(
+            display_name='my tuned model',
+            description='my tuned model description'))
+
+    model
+
+Distillation
+------------
 
 Only supported on Vertex. Requires allowlist.
 
-``` python
-distillation_job = client.tunings.distill(
-    student_model="gemma-2b-1.1-it",
-    teacher_model="gemini-1.5-pro-002",
-    training_dataset=genai.types.DistillationDataset(
-        gcs_uri="gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl",
-    ),
-    config=genai.types.CreateDistillationJobConfig(
-        epoch_count=1,
-        pipeline_root_directory=(
-            "gs://my-bucket"
+.. code:: python
+
+    distillation_job = client.tunings.distill(
+        student_model="gemma-2b-1.1-it",
+        teacher_model="gemini-1.5-pro-002",
+        training_dataset=genai.types.DistillationDataset(
+            gcs_uri="gs://cloud-samples-data/ai-platform/generative_ai/gemini-1_5/text/sft_train_data.jsonl",
         ),
-    ),
-)
-distillation_job
-```
+        config=genai.types.CreateDistillationJobConfig(
+            epoch_count=1,
+            pipeline_root_directory=(
+                "gs://vertex-sdk-dev-staging-us-central1/tmp/distillation_pipeline_root"
+            ),
+        ),
+    )
+    distillation_job
 
-``` python
-tcompleted_states = set([
-    "JOB_STATE_SUCCEEDED",
-    "JOB_STATE_FAILED",
-    "JOB_STATE_CANCELLED",
-    "JOB_STATE_PAUSED"
-])
+.. code:: python
 
-while distillation_job.state not in completed_states:
-    print(distillation_job.state)
-    distillation_job = client.tunings.get(name=distillation_job.name)
-    time.sleep(10)
-```
+    tcompleted_states = set([
+        "JOB_STATE_SUCCEEDED",
+        "JOB_STATE_FAILED",
+        "JOB_STATE_CANCELLED",
+        "JOB_STATE_PAUSED"
+    ])
 
-``` python
-distillation_job
-```
+    while distillation_job.state not in completed_states:
+        print(distillation_job.state)
+        distillation_job = client.tunings.get(name=distillation_job.name)
+        time.sleep(10)
 
-### List Tuning Jobs
+.. code:: python
 
-``` python
-for job in client.tunings.list(config={'page_size': 10}):
-  print(job)
-```
+    distillation_job
 
-``` python
-pager = client.tunings.list(config={'page_size': 10})
-print(pager.page_size)
-print(pager[0])
-pager.next_page()
-print(pager[0])
-```
+List Tuning Jobs
+----------------
 
-#### Async
+.. code:: python
 
-``` python
-async for job in await client.aio.tunings.list(config={'page_size': 10}):
-  print(job)
-```
+    for job in client.tunings.list(config={'page_size': 10}):
+      print(job)
 
-``` python
-async_pager = await client.aio.tunings.list(config={'page_size': 10})
-print(async_pager.page_size)
-print(async_pager[0])
-await async_pager.next_page()
-print(async_pager[0])
-```
+.. code:: python
 
-## Batch Prediction
+    pager = client.tunings.list(config={'page_size': 10})
+    print(pager.page_size)
+    print(pager[0])
+    pager.next_page()
+    print(pager[0])
+
+Async
+~~~~~
+
+.. code:: python
+
+    async for job in await client.aio.tunings.list(config={'page_size': 10}):
+      print(job)
+
+.. code:: python
+
+    async_pager = await client.aio.tunings.list(config={'page_size': 10})
+    print(async_pager.page_size)
+    print(async_pager[0])
+    await async_pager.next_page()
+    print(async_pager[0])
+
+Batch Prediction
+================
 
 Only supported in Vertex AI.
 
-### Create
+Create
+------
 
-``` python
-# Specify model and source file only, destination and job display name will be auto-populated
-job = client.batches.create(
-    model='gemini-1.5-flash-002',
-    src='bq://my-project.my-dataset.my-table',
-)
+.. code:: python
 
-job
-```
+    # Specify model and source file only, destination and job display name will be auto-populated
+    job = client.batches.create(
+        model='gemini-1.5-flash-002',
+        src='bq://my-project.my-dataset.my-table',
+    )
 
-``` python
-# Get a job by name
-job = client.batches.get(name=job.name)
+    job
 
-job.state
-```
+.. code:: python
 
-``` python
-completed_states = set([
-    "JOB_STATE_SUCCEEDED",
-    "JOB_STATE_FAILED",
-    "JOB_STATE_CANCELLED",
-    "JOB_STATE_PAUSED"
-])
-
-while job.state not in completed_states:
-    print(job.state)
+    # Get a job by name
     job = client.batches.get(name=job.name)
-    time.sleep(30)
 
-job
-```
+    job.state
 
-### List
+.. code:: python
 
-``` python
-for job in client.batches.list(config={'page_size': 10}):
-  print(job)
-```
+    completed_states = set([
+        "JOB_STATE_SUCCEEDED",
+        "JOB_STATE_FAILED",
+        "JOB_STATE_CANCELLED",
+        "JOB_STATE_PAUSED"
+    ])
 
-``` python
-pager = client.batches.list(config={'page_size': 10})
-print(pager.page_size)
-print(pager[0])
-pager.next_page()
-print(pager[0])
-```
+    while job.state not in completed_states:
+        print(job.state)
+        job = client.batches.get(name=job.name)
+        time.sleep(30)
 
-#### Async
+    job
 
-``` python
-async for job in await client.aio.batches.list(config={'page_size': 10}):
-  print(job)
-```
+List
+----
 
-``` python
-async_pager = await client.aio.batches.list(config={'page_size': 10})
-print(async_pager.page_size)
-print(async_pager[0])
-await async_pager.next_page()
-print(async_pager[0])
-```
+.. code:: python
 
-### Delete
+    for job in client.batches.list(config={'page_size': 10}):
+      print(job)
 
-``` python
-# Delete the job resource
-delete_job = client.batches.delete(name=job.name)
+.. code:: python
 
-delete_job
-```
+    pager = client.batches.list(config={'page_size': 10})
+    print(pager.page_size)
+    print(pager[0])
+    pager.next_page()
+    print(pager[0])
+
+Async
+~~~~~
+
+.. code:: python
+
+    async for job in await client.aio.batches.list(config={'page_size': 10}):
+      print(job)
+
+.. code:: python
+
+    async_pager = await client.aio.batches.list(config={'page_size': 10})
+    print(async_pager.page_size)
+    print(async_pager[0])
+    await async_pager.next_page()
+    print(async_pager[0])
+
+Delete
+------
+
+.. code:: python
+
+    # Delete the job resource
+    delete_job = client.batches.delete(name=job.name)
+    
+    delete_job
+
+
+Reference
+=========
+.. toctree::
+   :maxdepth: 4
+
+   genai
